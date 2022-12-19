@@ -14,8 +14,15 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
         main.cpp
-        src/mainwindow.cpp
+
         src/mainwindow.h
+        src/mainwindow.cpp
+        src/watchedpathsmodel.h
+        src/watchedpathsmodel.cpp
+        src/watchedpathsview.h
+        src/watchedpathsview.cpp
+        src/eventmodel.h
+        src/eventmodel.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
