@@ -10,17 +10,24 @@
 #include <QWidget>
 #include <QTableView>
 #include <QHeaderView>
+#include <QFileDialog>
+#include <QListView>
+#include <QTreeView>
+#include <QFileInfo>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     // Add Layout
     auto pathLineEdit = new QLineEdit;
-    auto addPathButton = new QPushButton;
-    addPathButton->setText(tr("Add"));
+
+    auto selectPathButton = new QPushButton(tr("Select"));
+    auto addPathButton = new QPushButton(tr("Add"));
+    addPathButton->setEnabled(false);
 
     auto addPathLayout = new QHBoxLayout;
     addPathLayout->addWidget(pathLineEdit, 1);
+    addPathLayout->addWidget(selectPathButton);
     addPathLayout->addWidget(addPathButton);
     addPathLayout->setAlignment(Qt::AlignTop);
 
@@ -70,8 +77,27 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(centralWidget);
 
     // Connections
+    connect(selectPathButton, &QPushButton::clicked, this, [this, pathLineEdit]{
+        QFileInfo path{pathLineEdit->text()};
+
+        QFileDialog dialog(this);
+        dialog.setDirectory(path.path());
+        dialog.setFileMode(QFileDialog::ExistingFile);
+        dialog.setAcceptMode(QFileDialog::AcceptSave);
+        dialog.setOption(QFileDialog::DontConfirmOverwrite, true);
+
+        if (dialog.exec()) {
+            auto fileNames = dialog.selectedFiles();
+            pathLineEdit->setText(fileNames.first());
+        }
+    });
+
     connect(addPathButton, &QPushButton::clicked, this, [pathLineEdit, watchedPathsModel]{
         watchedPathsModel->addPath(pathLineEdit->text());
+    });
+
+    connect(pathLineEdit, &QLineEdit::textChanged, addPathButton, [addPathButton](const QString& text) {
+        addPathButton->setEnabled(!text.isEmpty());
     });
 }
 
