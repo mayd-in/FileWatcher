@@ -40,18 +40,13 @@ MainWindow::MainWindow(QWidget *parent)
     watchedPathsView->verticalHeader()->hide();
     watchedPathsView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
 
-    watchedPathsModel->addPath("Path 1");
-    watchedPathsModel->addPath("Path 2");
-    watchedPathsModel->addPath("Path 3");
-
     // Events
     auto eventModel = new EventModel(this);
     auto tableView = new QTableView;
     tableView->setModel(eventModel);
     tableView->setSelectionBehavior(QTableView::SelectRows);
     tableView->setSelectionMode(QTableView::SingleSelection);
-    tableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    tableView->resizeColumnsToContents();
+    tableView->horizontalHeader()->setStretchLastSection(true);
 
     // Buttons
     auto clearButton = new QPushButton(tr("Clear"));
@@ -77,14 +72,18 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(centralWidget);
 
     // Connections
+    connect(&mFileSystemWatcher, &FileSystemWatcher::eventOccurred, eventModel, &EventModel::addEvent);
+    connect(&mFileSystemWatcher, &FileSystemWatcher::pathAdded, watchedPathsModel, &WatchedPathsModel::addPath);
+    connect(&mFileSystemWatcher, &FileSystemWatcher::pathRemoved, watchedPathsModel, &WatchedPathsModel::removePath);
+    connect(watchedPathsView, &WatchedPathsView::removeRequested, &mFileSystemWatcher, &FileSystemWatcher::removePath);
+
     connect(selectPathButton, &QPushButton::clicked, this, [this, pathLineEdit]{
-        QFileInfo path{pathLineEdit->text()};
+        QDir path{pathLineEdit->text()};
 
         QFileDialog dialog(this);
         dialog.setDirectory(path.path());
-        dialog.setFileMode(QFileDialog::ExistingFile);
-        dialog.setAcceptMode(QFileDialog::AcceptSave);
-        dialog.setOption(QFileDialog::DontConfirmOverwrite, true);
+        dialog.setFileMode(QFileDialog::Directory);
+        dialog.setAcceptMode(QFileDialog::AcceptOpen);
 
         if (dialog.exec()) {
             auto fileNames = dialog.selectedFiles();
@@ -92,8 +91,8 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
-    connect(addPathButton, &QPushButton::clicked, this, [pathLineEdit, watchedPathsModel]{
-        watchedPathsModel->addPath(pathLineEdit->text());
+    connect(addPathButton, &QPushButton::clicked, this, [this, pathLineEdit]{
+        mFileSystemWatcher.addPath(pathLineEdit->text());
     });
 
     connect(pathLineEdit, &QLineEdit::textChanged, addPathButton, [addPathButton](const QString& text) {

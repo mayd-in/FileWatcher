@@ -1,9 +1,10 @@
 #include "watchedpathsmodel.h"
+#include "filesystemwatcher.h"
 
 WatchedPathsModel::WatchedPathsModel(QObject *parent)
     : QAbstractTableModel{parent}
 {
-    mPaths;
+
 }
 
 void WatchedPathsModel::addPath(QString path)
@@ -17,17 +18,6 @@ void WatchedPathsModel::removePath(QString path)
 {
     auto index = mPaths.indexOf(path);
     if (index < 0) {
-        return;
-    }
-
-    beginRemoveRows(QModelIndex(), index, index);
-    mPaths.removeAt(index);
-    endRemoveRows();
-}
-
-void WatchedPathsModel::removePath(int index)
-{
-    if (index < 0 || index >= mPaths.size()) {
         return;
     }
 

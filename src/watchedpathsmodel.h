@@ -3,6 +3,9 @@
 
 #include <QAbstractTableModel>
 #include <QObject>
+#include <QFileSystemWatcher>
+
+class FileSystemWatcher;
 
 class WatchedPathsModel : public QAbstractTableModel
 {
@@ -13,7 +16,6 @@ public:
 
     void addPath(QString path);
     void removePath(QString path);
-    void removePath(int index);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;

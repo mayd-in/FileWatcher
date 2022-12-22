@@ -23,6 +23,8 @@ set(PROJECT_SOURCES
         src/watchedpathsview.cpp
         src/eventmodel.h
         src/eventmodel.cpp
+        src/filesystemwatcher.h
+        src/filesystemwatcher.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

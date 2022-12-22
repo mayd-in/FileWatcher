@@ -5,7 +5,7 @@
 #include <QDateTime>
 
 struct Event {
-    QString type;
+    QString action;
     QString path;
     bool isFolder;
     QDateTime timestamp;
@@ -16,6 +16,8 @@ class EventModel : public QAbstractTableModel
     Q_OBJECT
 public:
     explicit EventModel(QObject *parent = nullptr);
+
+    void addEvent(QString path, QString action, bool isFolder, QDateTime timestamp);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;

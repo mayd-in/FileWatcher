@@ -3,23 +3,20 @@
 EventModel::EventModel(QObject *parent)
     : QAbstractTableModel{parent}
 {
-    // TODO: Remove
-    Event event1 = {
-        QString("Create"),
-        QString("/tmp/repository"),
-        true,
-        QDateTime::currentDateTime()
+}
+
+void EventModel::addEvent(QString path, QString action, bool isFolder, QDateTime timestamp)
+{
+    Event event = {
+        action,
+        path,
+        isFolder,
+        timestamp
     };
 
-    // TODO: Remove
-    Event event2 = {
-        QString("Edit"),
-        QString("/tmp/lock"),
-        false,
-        QDateTime::currentDateTime()
-    };
-
-    mEvents << event1 << event2;
+    beginInsertRows(QModelIndex(), mEvents.size(), mEvents.size());
+    mEvents << event;
+    endInsertRows();
 }
 
 int EventModel::rowCount(const QModelIndex&) const
@@ -39,10 +36,10 @@ QVariant EventModel::data(const QModelIndex& index, int role) const
 
     auto event = mEvents.at(index.row());
     switch (index.column()) {
-        case 0: return event.type;
+        case 0: return event.action;
         case 1: return event.path;
         case 2: return (event.isFolder ? tr("Yes") : tr("No"));
-        case 3: return event.timestamp;
+        case 3: return event.timestamp.toString("yyyy.MM.dd hh:mm:ss");
     }
 
     return QVariant();
@@ -52,7 +49,7 @@ QVariant EventModel::headerData(int section, Qt::Orientation orientation, int ro
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
         switch (section) {
-            case 0: return tr("Type");
+            case 0: return tr("Action");
             case 1: return tr("Path");
             case 2: return tr("Folder");
             case 3: return tr("Timestamp");
