@@ -13,20 +13,19 @@ class FileSystemWatcher : public QObject
 public:
     FileSystemWatcher(QObject *parent = nullptr);
 
-    void addPath(const QString& path);
-    void removePath(const QString& path);
+    void addPath(const QString& dir);
+    void removePath(const QString& dir);
     void clear();
 
 signals:
-    void pathAdded(QString path);
-    void pathRemoved(QString path);
+    void pathAdded(QString dir);
+    void pathRemoved(QString dir);
 
     void eventOccurred(QString path, QString action, bool isFolder, QDateTime timestamp);
 
 private:
     QFileSystemWatcher mFileSystemWatcher;
-    QSet<QString> mPaths;
-    QHash<QString, int> mNonExistentPaths;
+    QSet<QString> mDirs;
 
     void onDirectoryChanged(const QString& path);
     void onFileChanged(const QString& path);

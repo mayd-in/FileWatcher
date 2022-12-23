@@ -9,39 +9,69 @@ FileSystemWatcher::FileSystemWatcher(QObject* parent) : QObject(parent)
     connect(&mFileSystemWatcher, &QFileSystemWatcher::fileChanged, this, &FileSystemWatcher::onFileChanged);
 }
 
-void FileSystemWatcher::addPath(const QString& path)
+void FileSystemWatcher::addPath(const QString& dir)
 {
-    QFileInfo fileInfo(path);
+    QFileInfo fileInfo(dir);
     if (!fileInfo.exists() || !fileInfo.isDir()) {
         qWarning() << "This is not an existent directory:" << fileInfo;
         return;
     }
 
-    if (mPaths.contains(path)) {
+    if (mDirs.contains(dir)) {
         return;
     }
 
-    mFileSystemWatcher.addPath(path);
+    mFileSystemWatcher.addPath(dir);
 
-    QDirIterator it(path, QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot, QDirIterator::Subdirectories);
+    QDirIterator it(dir, QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         auto entry = it.next();
         mFileSystemWatcher.addPath(entry);
     }
 
-    mPaths.insert(path);
-    emit pathAdded(path);
+    mDirs.insert(dir);
+    emit pathAdded(dir);
 }
 
-void FileSystemWatcher::removePath(const QString& path)
+void FileSystemWatcher::removePath(const QString& dir)
 {
-    if (!mPaths.contains(path)) {
+    if (!mDirs.contains(dir)) {
         return;
     }
 
-    mFileSystemWatcher.removePath(path);
-    mPaths.remove(path);
-    emit pathRemoved(path);
+    mDirs.remove(dir);
+
+    for (auto&& path : mFileSystemWatcher.directories()) {
+        bool found = false;
+        for (auto&& anotherDir : std::as_const(mDirs)) {
+            if (path.startsWith(anotherDir)) {
+                found = true;
+                break;
+            }
+
+        }
+
+        if (!found) {
+            mFileSystemWatcher.removePath(path);
+        }
+    }
+
+    for (auto&& path : mFileSystemWatcher.files()) {
+        bool found = false;
+        for (auto&& anotherDir : std::as_const(mDirs)) {
+            if (path.startsWith(anotherDir)) {
+                found = true;
+                break;
+            }
+
+        }
+
+        if (!found) {
+            mFileSystemWatcher.removePath(path);
+        }
+    }
+
+    emit pathRemoved(dir);
 }
 
 void FileSystemWatcher::clear()
@@ -49,10 +79,9 @@ void FileSystemWatcher::clear()
     mFileSystemWatcher.removePaths(mFileSystemWatcher.directories());
     mFileSystemWatcher.removePaths(mFileSystemWatcher.files());
 
-    for (auto it = mPaths.constBegin(); it != mPaths.constEnd(); it++) {
-        auto path = *it;
-        mPaths.remove(path);
-        emit pathRemoved(path);
+    for (auto&& dir : mDirs) {
+        mDirs.remove(dir);
+        emit pathRemoved(dir);
     }
 }
 
