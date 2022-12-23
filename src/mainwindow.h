@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "filesystemwatcher.h"
+#include "filedownloader.h"
 
 #include <QMainWindow>
 
@@ -15,5 +16,6 @@ public:
 
 private:
     FileSystemWatcher mFileSystemWatcher;
+    FileDownloader mFileDownloader;
 };
 #endif // MAINWINDOW_H

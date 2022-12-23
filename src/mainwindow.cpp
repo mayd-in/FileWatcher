@@ -15,6 +15,7 @@
 #include <QTreeView>
 #include <QFileInfo>
 
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -74,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Connections
     connect(&mFileSystemWatcher, &FileSystemWatcher::eventOccurred, eventModel, &EventModel::addEvent);
+    connect(&mFileSystemWatcher, &FileSystemWatcher::eventOccurred, &mFileDownloader, &FileDownloader::downloadCat);
     connect(&mFileSystemWatcher, &FileSystemWatcher::pathAdded, watchedPathsModel, &WatchedPathsModel::addPath);
     connect(&mFileSystemWatcher, &FileSystemWatcher::pathRemoved, watchedPathsModel, &WatchedPathsModel::removePath);
     connect(watchedPathsView, &WatchedPathsView::removeRequested, &mFileSystemWatcher, &FileSystemWatcher::removePath);
