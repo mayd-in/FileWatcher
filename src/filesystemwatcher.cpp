@@ -9,6 +9,36 @@ FileSystemWatcher::FileSystemWatcher(QObject* parent) : QObject(parent)
     connect(&mFileSystemWatcher, &QFileSystemWatcher::fileChanged, this, &FileSystemWatcher::onFileChanged);
 }
 
+void FileSystemWatcher::setActive(bool active)
+{
+    if (mActive == active)
+        return;
+
+    if (active) {
+        for (auto&& dir : std::as_const(mDirs)) {
+            mFileSystemWatcher.addPath(dir);
+
+            QDirIterator it(dir, QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot, QDirIterator::Subdirectories);
+            while (it.hasNext()) {
+                auto entry = it.next();
+                mFileSystemWatcher.addPath(entry);
+            }
+        }
+    }
+    else {
+        mFileSystemWatcher.removePaths(mFileSystemWatcher.directories());
+        mFileSystemWatcher.removePaths(mFileSystemWatcher.files());
+    }
+
+    mActive = active;
+    emit activeChanged(active);
+}
+
+bool FileSystemWatcher::active()
+{
+    return mActive;
+}
+
 void FileSystemWatcher::addPath(const QString& dir)
 {
     QFileInfo fileInfo(dir);
@@ -21,12 +51,14 @@ void FileSystemWatcher::addPath(const QString& dir)
         return;
     }
 
-    mFileSystemWatcher.addPath(dir);
+    if (mActive) {
+        mFileSystemWatcher.addPath(dir);
 
-    QDirIterator it(dir, QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        auto entry = it.next();
-        mFileSystemWatcher.addPath(entry);
+        QDirIterator it(dir, QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            auto entry = it.next();
+            mFileSystemWatcher.addPath(entry);
+        }
     }
 
     mDirs.insert(dir);
@@ -79,7 +111,8 @@ void FileSystemWatcher::clear()
     mFileSystemWatcher.removePaths(mFileSystemWatcher.directories());
     mFileSystemWatcher.removePaths(mFileSystemWatcher.files());
 
-    for (auto&& dir : mDirs) {
+    for (auto it = mDirs.constBegin(); it != mDirs.constEnd(); it++) {
+        auto dir = *it;
         mDirs.remove(dir);
         emit pathRemoved(dir);
     }

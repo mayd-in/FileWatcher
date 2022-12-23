@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     auto clearButton = new QPushButton(tr("Clear"));
     auto startButton = new QPushButton(tr("Start"));
     auto stopButton = new QPushButton(tr("Stop"));
+    startButton->setEnabled(!mFileSystemWatcher.active());
 
     auto buttonsLayout = new QHBoxLayout;
     buttonsLayout->setAlignment(Qt::AlignLeft);
@@ -102,6 +103,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(clearButton, &QPushButton::clicked, this, [this, eventModel] {
         mFileSystemWatcher.clear();
         eventModel->clear();
+    });
+    connect(startButton, &QPushButton::clicked, this, [this]{
+        mFileSystemWatcher.setActive(true);
+    });
+    connect(stopButton, &QPushButton::clicked, this, [this]{
+        mFileSystemWatcher.setActive(false);
+    });
+    connect(&mFileSystemWatcher, &FileSystemWatcher::activeChanged, this, [startButton, stopButton](bool active) {
+        startButton->setEnabled(!active);
+        stopButton->setEnabled(active);
     });
 }
 
