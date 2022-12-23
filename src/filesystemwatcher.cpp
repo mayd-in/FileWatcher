@@ -17,6 +17,10 @@ void FileSystemWatcher::addPath(const QString& path)
         return;
     }
 
+    if (mPaths.contains(path)) {
+        return;
+    }
+
     mFileSystemWatcher.addPath(path);
 
     QDirIterator it(path, QDir::Dirs | QDir::Files | QDir::NoDot | QDir::NoDotDot, QDirIterator::Subdirectories);
@@ -38,6 +42,18 @@ void FileSystemWatcher::removePath(const QString& path)
     mFileSystemWatcher.removePath(path);
     mPaths.remove(path);
     emit pathRemoved(path);
+}
+
+void FileSystemWatcher::clear()
+{
+    mFileSystemWatcher.removePaths(mFileSystemWatcher.directories());
+    mFileSystemWatcher.removePaths(mFileSystemWatcher.files());
+
+    for (auto it = mPaths.constBegin(); it != mPaths.constEnd(); it++) {
+        auto path = *it;
+        mPaths.remove(path);
+        emit pathRemoved(path);
+    }
 }
 
 void FileSystemWatcher::onDirectoryChanged(const QString& path)

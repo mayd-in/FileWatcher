@@ -19,6 +19,17 @@ void EventModel::addEvent(QString path, QString action, bool isFolder, QDateTime
     endInsertRows();
 }
 
+void EventModel::clear()
+{
+    if (mEvents.size() <= 0) {
+        return;
+    }
+
+    beginRemoveRows(QModelIndex(), 0, mEvents.size()-1);
+    mEvents.clear();
+    endRemoveRows();
+}
+
 int EventModel::rowCount(const QModelIndex&) const
 {
     return mEvents.size();

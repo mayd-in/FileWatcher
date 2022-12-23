@@ -18,6 +18,7 @@ public:
     explicit EventModel(QObject *parent = nullptr);
 
     void addEvent(QString path, QString action, bool isFolder, QDateTime timestamp);
+    void clear();
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;

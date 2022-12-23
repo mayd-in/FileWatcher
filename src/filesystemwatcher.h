@@ -15,6 +15,7 @@ public:
 
     void addPath(const QString& path);
     void removePath(const QString& path);
+    void clear();
 
 signals:
     void pathAdded(QString path);

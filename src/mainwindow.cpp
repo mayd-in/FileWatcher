@@ -98,6 +98,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(pathLineEdit, &QLineEdit::textChanged, addPathButton, [addPathButton](const QString& text) {
         addPathButton->setEnabled(!text.isEmpty());
     });
+
+    connect(clearButton, &QPushButton::clicked, this, [this, eventModel] {
+        mFileSystemWatcher.clear();
+        eventModel->clear();
+    });
 }
 
 MainWindow::~MainWindow()
